@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 type Config struct {
@@ -22,8 +23,10 @@ func main() {
 	// connect to DB
 	db, err := ConnectToDB()
 	if err != nil {
+		fmt.Println(err.Error())
 		log.Panic("Connect to DB failed!")
 	}
+	fmt.Println("Connect to Postgress successfully!")
 	config := Config{
 		DB: db,
 	}
@@ -35,7 +38,7 @@ func main() {
 }
 
 func GetDB(dns string) (*sql.DB, error) {
-	db, err := sql.Open("pgx", dns)
+	db, err := sql.Open("postgres", dns)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +50,11 @@ func GetDB(dns string) (*sql.DB, error) {
 }
 
 func ConnectToDB() (*sql.DB, error) {
-	dns := os.Getenv("PostgresDB")
+	//dns := os.Getenv("PostgresDB")
+	dns := "host=localhost port=5432 user=user password=password dbname=user sslmode=disable"
 	for {
 		count++
-		fmt.Printf("Connecting to DB attempting %d ...", count)
+		fmt.Printf("Connecting to DB attempting %d ...\n", count)
 		db, err := GetDB(dns)
 		if err != nil {
 			fmt.Println("Data base is not ready yet...")
@@ -58,7 +62,7 @@ func ConnectToDB() (*sql.DB, error) {
 			return db, nil
 		}
 
-		if count > 10 {
+		if count > 2 {
 			return nil, err
 		}
 
