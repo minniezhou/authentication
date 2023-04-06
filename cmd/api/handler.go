@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -13,7 +12,7 @@ type Handler struct {
 	router *chi.Mux
 }
 
-func (*Config) NewHandler() *Handler {
+func (c *Config) NewHandler() *Handler {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http//*", "https://"},
@@ -25,8 +24,39 @@ func (*Config) NewHandler() *Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Heartbeat("ping"))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { fmt.Println("Ping authentification service") })
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		c.writeJson(w, http.StatusAccepted, jsonResponse{Error: false, Message: "Ping Authortication Service"})
+	})
+	r.Post("/auth", c.CheckUser)
 	return &Handler{
 		router: r,
 	}
+}
+
+func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
+	type userType struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	var input userType
+	err := c.readJson(w, r, &input)
+	if err != nil {
+		c.errorJson(w, "Wrong username or password!")
+		return
+	}
+	m := NewModel(c.DB)
+	user, err := m.user.GetInfoByEmail(input.Email)
+	if err != nil || user == nil {
+		c.errorJson(w, "Wrong username or password!")
+		return
+	}
+	match := user.MatchPassword(input.Password)
+
+	if match {
+		response := jsonResponse{Error: false, Message: "User Authorized!"}
+		c.writeJson(w, http.StatusAccepted, response)
+	} else {
+		c.errorJson(w, "Wrong username or password!")
+	}
+
 }
