@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -58,5 +60,33 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		c.errorJson(w, "Wrong username or password!")
 	}
+	c.handleLog(input.Email, match)
+}
 
+func (c *Config) handleLog(email string, authed bool) error {
+	type logType struct {
+		Name    string `json:"name"`
+		Message string `json:"message"`
+	}
+
+	message := email + "is not authorized!"
+	if authed {
+		message = email + "is authorized!"
+	}
+	log := logType{
+		Name:    "log from authentitcation service",
+		Message: message,
+	}
+
+	logPayload, err := json.MarshalIndent(log, "", "  ")
+	if err != nil {
+		return err
+	}
+	requesBody := bytes.NewBuffer(logPayload)
+
+	_, err = http.Post("http://localhost:4321/log", "application/json", requesBody)
+	if err != nil {
+		return err
+	}
+	return nil
 }
