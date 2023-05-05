@@ -5,7 +5,7 @@ WORKDIR /app
 RUN CGO_ENABLED=0 go build -o authentication ./...
 
 FROM alpine:latest
-RUN mkdir app
+RUN mkdir /app
 WORKDIR /app
 COPY --from=builder /app/authentication .
 CMD ["./authentication"]

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -50,8 +51,7 @@ func GetDB(dns string) (*sql.DB, error) {
 }
 
 func ConnectToDB() (*sql.DB, error) {
-	//dns := os.Getenv("PostgresDB")
-	dns := "host=localhost port=5432 user=user password=password dbname=user sslmode=disable"
+	dns := os.Getenv("POSTGRES_DB")
 	for {
 		count++
 		fmt.Printf("Connecting to DB attempting %d ...\n", count)
