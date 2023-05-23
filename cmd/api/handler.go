@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -84,9 +85,18 @@ func (c *Config) handleLog(email string, authed bool) error {
 	}
 	requesBody := bytes.NewBuffer(logPayload)
 
-	_, err = http.Post("http://localhost:4321/log", "application/json", requesBody)
+	logging_host := getEnv("LOGGING_SERVICE", "localhost")
+	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func getEnv(key, default_value string) string {
+	value := os.Getenv(key)
+	if len(value) != 0 {
+		return value
+	}
+	return default_value
 }

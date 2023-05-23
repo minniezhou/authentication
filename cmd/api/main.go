@@ -52,6 +52,7 @@ func GetDB(dns string) (*sql.DB, error) {
 
 func ConnectToDB() (*sql.DB, error) {
 	dns := os.Getenv("POSTGRES_DB")
+	fmt.Println("POSTGRES_DB: ", dns)
 	for {
 		count++
 		fmt.Printf("Connecting to DB attempting %d ...\n", count)
