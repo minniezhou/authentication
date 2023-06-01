@@ -10,7 +10,6 @@ var _ = Describe("Test handler", func() {
 		It("should be successful", func() {
 			fact := true
 			Expect(fact).To(BeTrue())
-			Expect(fact).To(BeFalse())
 		})
 	})
 })
