@@ -24,7 +24,7 @@ jobs:
         run: go build -v ./...
 
   test:
-    steps:
     runs-on: ubuntu-latest
+    steps:
       - name: Test
         run: go test -v ./...
