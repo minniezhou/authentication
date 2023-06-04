@@ -48,7 +48,10 @@ func (*Config) writeJson(w http.ResponseWriter, status int, data any, headers ..
 		}
 	}
 
-	w.Write(jData)
+	_, err = w.Write(jData)
+	if err != nil {
+		return
+	}
 }
 
 func (c *Config) errorJson(w http.ResponseWriter, message string, statusCode ...int) {

@@ -64,7 +64,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 	c.handleLog(input.Email, match)
 }
 
-func (c *Config) handleLog(email string, authed bool) error {
+func (c *Config) handleLog(email string, authed bool) {
 	type logType struct {
 		Name    string `json:"name"`
 		Message string `json:"message"`
@@ -81,16 +81,12 @@ func (c *Config) handleLog(email string, authed bool) error {
 
 	logPayload, err := json.MarshalIndent(log, "", "  ")
 	if err != nil {
-		return err
+		return
 	}
 	requesBody := bytes.NewBuffer(logPayload)
 
 	logging_host := getEnv("LOGGING_SERVICE", "localhost")
 	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func getEnv(key, default_value string) string {
