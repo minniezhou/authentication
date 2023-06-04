@@ -31,11 +31,11 @@ func (*Config) readJson(w http.ResponseWriter, r *http.Request, data any) error 
 	return nil
 }
 
-func (*Config) writeJson(w http.ResponseWriter, status int, data any, headers ...http.Header) error {
+func (*Config) writeJson(w http.ResponseWriter, status int, data any, headers ...http.Header) {
 	jData, err := json.MarshalIndent(data, "", "  ")
 
 	if err != nil {
-		return err
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -48,15 +48,10 @@ func (*Config) writeJson(w http.ResponseWriter, status int, data any, headers ..
 		}
 	}
 
-	_, err = w.Write(jData)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	w.Write(jData)
 }
 
-func (c *Config) errorJson(w http.ResponseWriter, message string, statusCode ...int) error {
+func (c *Config) errorJson(w http.ResponseWriter, message string, statusCode ...int) {
 	status := http.StatusBadRequest
 	if len(statusCode) > 0 {
 		status = statusCode[0]
@@ -65,5 +60,5 @@ func (c *Config) errorJson(w http.ResponseWriter, message string, statusCode ...
 		Error:   true,
 		Message: message,
 	}
-	return c.writeJson(w, status, response)
+	c.writeJson(w, status, response)
 }
