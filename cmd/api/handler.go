@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -86,7 +87,10 @@ func (c *Config) handleLog(email string, authed bool) {
 	requesBody := bytes.NewBuffer(logPayload)
 
 	logging_host := getEnv("LOGGING_SERVICE", "localhost")
-	http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
+	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
+	if err != nil {
+		fmt.Println("http post to log failed")
+	}
 }
 
 func getEnv(key, default_value string) string {
