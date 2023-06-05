@@ -86,7 +86,7 @@ func (c *Config) handleLog(email string, authed bool) {
 	requesBody := bytes.NewBuffer(logPayload)
 
 	logging_host := getEnv("LOGGING_SERVICE", "localhost")
-	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
+	http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
 }
 
 func getEnv(key, default_value string) string {
