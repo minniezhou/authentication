@@ -50,7 +50,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 	var input userType
 	err := jsonToolBox.ReadJson(w, r, &input)
 	if err != nil {
-		err := jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		err = jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		if err != nil {
 			fmt.Println("writing json error")
 		}
@@ -59,7 +59,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 	m := NewModel(c.DB)
 	user, err := m.user.GetInfoByEmail(input.Email)
 	if err != nil || user == nil {
-		jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		err = jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		if err != nil {
 			fmt.Println("writing json error")
 		}
@@ -69,9 +69,12 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 
 	if match {
 		response := jsonToolBox.JsonResponse{Error: false, Message: "User Authorized!"}
-		jsonToolBox.WriteJson(w, http.StatusAccepted, response)
+		err = jsonToolBox.WriteJson(w, http.StatusAccepted, response)
+		if err != nil {
+			fmt.Println("writing json error")
+		}
 	} else {
-		jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		err = jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		if err != nil {
 			fmt.Println("writing json error")
 		}
