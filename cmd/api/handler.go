@@ -31,7 +31,10 @@ func (c *Config) NewHandler() *Handler {
 	r.Use(middleware.Heartbeat("ping"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		jsonToolBox.WriteJson(w, http.StatusAccepted, jsonToolBox.JsonResponse{Error: false, Message: "Ping Authortication Service"})
+		err := jsonToolBox.WriteJson(w, http.StatusAccepted, jsonToolBox.JsonResponse{Error: false, Message: "Ping Authortication Service"})
+		if err != nil {
+			fmt.Println("writing json error")
+		}
 	})
 	r.Post("/auth", c.CheckUser)
 	return &Handler{
@@ -47,13 +50,19 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 	var input userType
 	err := jsonToolBox.ReadJson(w, r, &input)
 	if err != nil {
-		jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		err := jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		if err != nil {
+			fmt.Println("writing json error")
+		}
 		return
 	}
 	m := NewModel(c.DB)
 	user, err := m.user.GetInfoByEmail(input.Email)
 	if err != nil || user == nil {
 		jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		if err != nil {
+			fmt.Println("writing json error")
+		}
 		return
 	}
 	match := user.MatchPassword(input.Password)
@@ -63,6 +72,9 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 		jsonToolBox.WriteJson(w, http.StatusAccepted, response)
 	} else {
 		jsonToolBox.ErrorJson(w, "Wrong username or password!")
+		if err != nil {
+			fmt.Println("writing json error")
+		}
 	}
 	c.handleLog(input.Email, match)
 }
