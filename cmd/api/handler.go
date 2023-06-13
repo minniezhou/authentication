@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+
+	"github.com/minniezhou/jsonToolBox"
 )
 
 type Handler struct {
@@ -29,7 +31,7 @@ func (c *Config) NewHandler() *Handler {
 	r.Use(middleware.Heartbeat("ping"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		c.writeJson(w, http.StatusAccepted, jsonResponse{Error: false, Message: "Ping Authortication Service"})
+		jsonToolBox.WriteJson(w, http.StatusAccepted, jsonResponse{Error: false, Message: "Ping Authortication Service"})
 	})
 	r.Post("/auth", c.CheckUser)
 	return &Handler{
@@ -43,24 +45,24 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	var input userType
-	err := c.readJson(w, r, &input)
+	err := jsonToolBox.ReadJson(w, r, &input)
 	if err != nil {
-		c.errorJson(w, "Wrong username or password!")
+		jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		return
 	}
 	m := NewModel(c.DB)
 	user, err := m.user.GetInfoByEmail(input.Email)
 	if err != nil || user == nil {
-		c.errorJson(w, "Wrong username or password!")
+		jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		return
 	}
 	match := user.MatchPassword(input.Password)
 
 	if match {
-		response := jsonResponse{Error: false, Message: "User Authorized!"}
-		c.writeJson(w, http.StatusAccepted, response)
+		response := jsonToolBox.JsonResponse{Error: false, Message: "User Authorized!"}
+		jsonToolBox.WriteJson(w, http.StatusAccepted, response)
 	} else {
-		c.errorJson(w, "Wrong username or password!")
+		jsonToolBox.ErrorJson(w, "Wrong username or password!")
 	}
 	c.handleLog(input.Email, match)
 }
