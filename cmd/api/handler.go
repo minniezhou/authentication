@@ -31,7 +31,7 @@ func (c *Config) NewHandler() *Handler {
 	r.Use(middleware.Heartbeat("ping"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		jsonToolBox.WriteJson(w, http.StatusAccepted, jsonResponse{Error: false, Message: "Ping Authortication Service"})
+		jsonToolBox.WriteJson(w, http.StatusAccepted, jsonToolBox.JsonResponse{Error: false, Message: "Ping Authortication Service"})
 	})
 	r.Post("/auth", c.CheckUser)
 	return &Handler{
