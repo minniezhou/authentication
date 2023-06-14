@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"context"
@@ -22,33 +22,38 @@ type User struct {
 	UpdatedAt time.Time `json:"update_at"`
 }
 
+type UserInterface interface {
+	GetInfoByEmail(email string) (*User, error)
+	MatchPassword(password string) bool
+}
+
 type Model struct {
-	user User
+	user *User
 }
 
 func NewModel(database *sql.DB) *Model {
 	db = database
 	return &Model{
-		user: User{},
+		user: &User{},
 	}
 }
 
-func (u *User) GetInfoByEmail(email string) (*User, error) {
+func (m *Model) GetInfoByEmail(email string) (*User, error) {
 	queryCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	row := db.QueryRowContext(queryCtx, "SELECT * FROM users WHERE email = $1", email)
-	err := row.Scan(&u.ID, &u.Email, &u.FirstName, &u.LastName, &u.Password,
-		&u.Active, &u.CreatedAt, &u.UpdatedAt)
+	err := row.Scan(&m.user.ID, &m.user.Email, &m.user.FirstName, &m.user.LastName, &m.user.Password,
+		&m.user.Active, &m.user.CreatedAt, &m.user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, errors.New("did not find user with this email")
 	}
 	if err != nil {
 		return nil, err
 	}
-	return u, nil
+	return m.user, nil
 }
 
-func (u *User) MatchPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+func (m *Model) MatchPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(m.user.Password), []byte(password))
 	return err == nil
 }

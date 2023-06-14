@@ -8,11 +8,14 @@ import (
 	"os"
 	"time"
 
+	"authentication/cmd/model"
+
 	_ "github.com/lib/pq"
 )
 
 type Config struct {
-	DB *sql.DB
+	DB            *sql.DB
+	userInterface model.UserInterface
 }
 
 const webPort = "80"
@@ -28,8 +31,10 @@ func main() {
 		log.Panic("Connect to DB failed!")
 	}
 	fmt.Println("Connect to Postgress successfully!")
+	m := model.NewModel(db)
 	config := Config{
-		DB: db,
+		DB:            db,
+		userInterface: m,
 	}
 	h := config.NewHandler()
 	err = http.ListenAndServe(fmt.Sprintf(":%s", webPort), h.router)

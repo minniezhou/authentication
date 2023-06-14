@@ -56,8 +56,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	m := NewModel(c.DB)
-	user, err := m.user.GetInfoByEmail(input.Email)
+	user, err := c.userInterface.GetInfoByEmail(input.Email)
 	if err != nil || user == nil {
 		err = jsonToolBox.ErrorJson(w, "Wrong username or password!")
 		if err != nil {
@@ -65,7 +64,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	match := user.MatchPassword(input.Password)
+	match := c.userInterface.MatchPassword(input.Password)
 
 	if match {
 		response := jsonToolBox.JsonResponse{Error: false, Message: "User Authorized!"}
@@ -79,7 +78,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("writing json error")
 		}
 	}
-	c.handleLog(input.Email, match)
+	//c.handleLog(input.Email, match)
 }
 
 func (c *Config) handleLog(email string, authed bool) {
