@@ -2,6 +2,7 @@ package main
 
 import (
 	"authentication/cmd/mock/dbmocks"
+	"authentication/cmd/mock/loggermocks"
 	"authentication/cmd/model"
 	"bytes"
 	"database/sql"
@@ -26,6 +27,7 @@ func mockMatchPassword(ui *dbmocks.UserInterface, pw string, result bool) {
 var _ = Describe("Test handler", func() {
 	When("Check User", func() {
 		var userInterface *dbmocks.UserInterface
+		var loggerInterface *loggermocks.LoggerInterface
 		var testApp Config
 		postBody := map[string]interface{}{
 			"email":    "me@here.com",
@@ -33,8 +35,13 @@ var _ = Describe("Test handler", func() {
 		}
 		BeforeEach(func() {
 			userInterface = dbmocks.NewUserInterface(GinkgoT())
+			loggerInterface = loggermocks.NewLoggerInterface(GinkgoT())
 			var db *sql.DB
-			testApp = Config{DB: db, userInterface: userInterface}
+			testApp = Config{
+				DB:              db,
+				userInterface:   userInterface,
+				loggerInterface: loggerInterface,
+			}
 		})
 		It("should fail if GetInfobyEmail fails", func() {
 			mockGetInfoByEmail(userInterface, "me@here.com",
@@ -61,6 +68,7 @@ var _ = Describe("Test handler", func() {
 				},
 				nil)
 			mockMatchPassword(userInterface, "verysecret", false)
+			(*loggerInterface).On("HandleLog", "me@here.com", false).Return()
 			body, _ := json.Marshal(postBody)
 			req, _ := http.NewRequest("POST", "/auth", bytes.NewReader(body))
 			rr := httptest.NewRecorder()
@@ -69,6 +77,7 @@ var _ = Describe("Test handler", func() {
 			Expect(rr.Code).To(Equal(http.StatusBadRequest))
 		})
 		It("should be successful if everything passes", func() {
+			(*loggerInterface).On("HandleLog", "me@here.com", true).Return()
 			mockGetInfoByEmail(userInterface, "me@here.com",
 				&model.User{
 					ID:        "1",

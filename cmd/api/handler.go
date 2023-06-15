@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,6 +14,12 @@ import (
 
 type Handler struct {
 	router *chi.Mux
+}
+
+type HandlerInterface interface {
+	NewHandler() *Handler
+	CheckUser(http.ResponseWriter, *http.Request)
+	HandleLog(string, bool)
 }
 
 func (c *Config) NewHandler() *Handler {
@@ -78,35 +82,7 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("writing json error")
 		}
 	}
-	//c.handleLog(input.Email, match)
-}
-
-func (c *Config) handleLog(email string, authed bool) {
-	type logType struct {
-		Name    string `json:"name"`
-		Message string `json:"message"`
-	}
-
-	message := email + "is not authorized!"
-	if authed {
-		message = email + "is authorized!"
-	}
-	log := logType{
-		Name:    "log from authentitcation service",
-		Message: message,
-	}
-
-	logPayload, err := json.MarshalIndent(log, "", "  ")
-	if err != nil {
-		return
-	}
-	requesBody := bytes.NewBuffer(logPayload)
-
-	logging_host := getEnv("LOGGING_SERVICE", "localhost")
-	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
-	if err != nil {
-		fmt.Println("http post to log failed")
-	}
+	c.loggerInterface.HandleLog(input.Email, match)
 }
 
 func getEnv(key, default_value string) string {

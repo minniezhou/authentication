@@ -13,14 +13,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Config struct {
-	DB            *sql.DB
-	userInterface model.UserInterface
-}
-
 const webPort = "80"
 
 var count int64
+
+type Config struct {
+	DB              *sql.DB
+	userInterface   model.UserInterface
+	loggerInterface LoggerInterface
+}
 
 func main() {
 	fmt.Println("This is the authentication service...")
@@ -32,9 +33,11 @@ func main() {
 	}
 	fmt.Println("Connect to Postgress successfully!")
 	m := model.NewModel(db)
+	logger := NewLogger()
 	config := Config{
-		DB:            db,
-		userInterface: m,
+		DB:              db,
+		userInterface:   m,
+		loggerInterface: logger,
 	}
 	h := config.NewHandler()
 	err = http.ListenAndServe(fmt.Sprintf(":%s", webPort), h.router)
