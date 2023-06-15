@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/cors v1.2.1
 	github.com/lib/pq v1.10.9
-	github.com/minniezhou/jsonToolBox v0.3.0
+	github.com/minniezhou/jsonToolBox v0.3.1-0.20230615134620-7b02e976597c
 	github.com/onsi/ginkgo/v2 v2.9.7
 	github.com/onsi/gomega v1.27.7
 	github.com/stretchr/testify v1.8.4

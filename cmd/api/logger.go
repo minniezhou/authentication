@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/minniezhou/jsonToolBox"
 )
 
 type LoggerInterface interface {
@@ -38,7 +40,7 @@ func (*Logger) HandleLog(email string, authed bool) {
 	}
 	requesBody := bytes.NewBuffer(logPayload)
 
-	logging_host := getEnv("LOGGING_SERVICE", "localhost")
+	logging_host := jsonToolBox.GetEnv("LOGGING_SERVICE", "localhost")
 	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
 	if err != nil {
 		fmt.Println("http post to log failed")

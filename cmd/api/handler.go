@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -83,12 +82,4 @@ func (c *Config) CheckUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	c.loggerInterface.HandleLog(input.Email, match)
-}
-
-func getEnv(key, default_value string) string {
-	value := os.Getenv(key)
-	if len(value) != 0 {
-		return value
-	}
-	return default_value
 }
