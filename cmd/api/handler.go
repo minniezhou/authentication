@@ -15,12 +15,6 @@ type Handler struct {
 	router *chi.Mux
 }
 
-type HandlerInterface interface {
-	NewHandler() *Handler
-	CheckUser(http.ResponseWriter, *http.Request)
-	HandleLog(string, bool)
-}
-
 func (c *Config) NewHandler() *Handler {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{

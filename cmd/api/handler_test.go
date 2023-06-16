@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"time"
 
+	"github.com/go-chi/chi"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -23,6 +24,37 @@ func mockGetInfoByEmail(ui *dbmocks.UserInterface, email string, result *model.U
 func mockMatchPassword(ui *dbmocks.UserInterface, pw string, result bool) {
 	(*ui).On("MatchPassword", pw).Return(result)
 }
+
+var _ = Describe("Test Chi Route", func() {
+	When("Walk chi route", func() {
+		It("should return found", func() {
+			walkRoutes := func(chiRoutes *chi.Mux, route string) error {
+				found := false
+				chi.Walk(chiRoutes, func(method string,
+					foundRoute string,
+					handler http.Handler,
+					middlewares ...func(http.Handler) http.Handler) error {
+					if foundRoute == route {
+						found = true
+					}
+					return nil
+				})
+				if !found {
+					return errors.New("did not find the route")
+				}
+				return nil
+			}
+			testApp := Config{}
+			testRoutes := testApp.NewHandler()
+			chiRoutes := testRoutes.router
+			routes := []string{"/auth", "/"}
+
+			for _, route := range routes {
+				Expect(walkRoutes(chiRoutes, route)).To(BeNil())
+			}
+		})
+	})
+})
 
 var _ = Describe("Test handler", func() {
 	When("Check User", func() {
