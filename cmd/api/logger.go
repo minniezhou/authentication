@@ -41,7 +41,10 @@ func (*Logger) HandleLog(email string, authed bool) {
 	requesBody := bytes.NewBuffer(logPayload)
 
 	logging_host := jsonToolBox.GetEnv("LOGGING_SERVICE", "localhost")
-	_, err = http.Post("http://"+logging_host+":4321/log", "application/json", requesBody)
+	request, err := http.NewRequest("POST", "http://"+logging_host+":4321/log", requesBody)
+	client := &http.Client{}
+	client.Do(request)
+
 	if err != nil {
 		fmt.Println("http post to log failed")
 	}
